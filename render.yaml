@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: telegram-channel-copier-bot
+    env: node
+    buildCommand: npm install
+    startCommand: npm run start:auth
+    envVars:
+      - key: BOT_TOKEN
+        sync: false

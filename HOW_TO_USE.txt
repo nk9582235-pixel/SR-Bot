@@ -1,0 +1,40 @@
+HOW TO USE THE TELEGRAM CHANNEL COPIER BOT
+
+STEP 1: SET UP THE BOT
+1. Create a bot with @BotFather on Telegram
+2. Get your BOT_TOKEN
+3. Set BOT_TOKEN in your Render.com environment variables
+
+STEP 2: ADD BOT TO CHANNELS
+1. Add your bot as an administrator to both source and target channels
+2. Make sure it has permission to read messages and send messages
+
+STEP 3: USE THE BOT COMMANDS
+1. Set Source Channel:
+   /schannel -100xxxxxx
+
+2. Set Target Channel:
+   /tchannel -100xxxxxx
+
+3. Set Message Range:
+   - For full channel: /set_F
+   - For selective messages: /set_P "https://t.me/xxxxx/71031" "https://t.me/xxxx/71050"
+
+4. Set Copy Type:
+   - For all content: /all
+   - For media only: /media
+
+5. Start Copying:
+   /copy
+
+6. Check Status:
+   /status
+
+STEP 4: DEPLOY TO RENDER.COM
+1. Fork this repository
+2. Create a new Web Service on Render.com
+3. Connect your repository
+4. Set BOT_TOKEN environment variable
+5. Deploy!
+
+The bot will copy messages from your source to target channel based on your settings.

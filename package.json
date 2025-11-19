@@ -1,0 +1,29 @@
+{
+  "name": "telegram-media-transfer-bot",
+  "version": "1.0.0",
+  "description": "A Telegram bot to transfer media between channels",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "start:advanced": "node advanced_bot.js",
+    "start:copier": "node channel_copier_bot.js",
+    "start:server": "node server.js",
+    "start:simple": "node simple_channel_copier.js",
+    "start:auth": "node auth_channel_copier.js"
+  },
+  "dependencies": {
+    "telegraf": "^4.12.2",
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2",
+    "fs": "0.0.1-security",
+    "path": "^0.12.7"
+  },
+  "keywords": [
+    "telegram",
+    "bot",
+    "media",
+    "transfer"
+  ],
+  "author": "Developer",
+  "license": "MIT"
+}
