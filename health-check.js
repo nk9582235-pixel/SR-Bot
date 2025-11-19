@@ -2,7 +2,7 @@
 console.log('Health check script running...');
 
 // Check if required environment variables are set
-const requiredVars = ['BOT_TOKEN', 'TELEGRAM_API_ID', 'TELEGRAM_API_HASH'];
+const requiredVars = ['BOT_TOKEN']; // TELEGRAM_API_ID and TELEGRAM_API_HASH are optional for basic bot
 const missingVars = [];
 
 requiredVars.forEach(varName => {

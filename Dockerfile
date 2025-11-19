@@ -1,5 +1,5 @@
-# Use Node.js 16 alpine as base image
-FROM node:16-alpine
+# Use Node.js 18 alpine as base image
+FROM node:18-alpine
 
 # Set working directory
 WORKDIR /app
@@ -8,7 +8,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install dependencies
-RUN npm install --only=production
+RUN npm install --omit=dev --no-audit --no-fund
 
 # Copy application code
 COPY . .
