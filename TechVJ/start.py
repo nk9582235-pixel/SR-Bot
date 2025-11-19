@@ -11,10 +11,7 @@ from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, Message
 from config import API_ID, API_HASH, ERROR_MESSAGE, LOGIN_SYSTEM, STRING_SESSION, CHANNEL_ID, WAITING_TIME
 from database.db import db
 from TechVJ.strings import HELP_TXT
-try:
-    from bot import TechVJUser
-except ImportError:
-    TechVJUser = None
+from bot import TechVJUser
 
 class batch_temp(object):
     IS_BATCH = {}
@@ -122,10 +119,7 @@ async def save(client: Client, message: Message):
             return await message.reply_text("**One Task Is Already Processing. Wait For Complete It. If You Want To Cancel This Task Then Use - /cancel**")
         datas = message.text.split("/")
         temp = datas[-1].replace("?single","").split("-")
-        try:
-            fromID = int(temp[0].strip())
-        except:
-            return await message.reply_text("**Invalid URL format. Please check the link and try again.**")
+        fromID = int(temp[0].strip())
         try:
             toID = int(temp[1].strip())
         except:
@@ -155,11 +149,7 @@ async def save(client: Client, message: Message):
             
             # private
             if "https://t.me/c/" in message.text:
-                try:
-                    chatid = int("-100" + datas[4])
-                except (IndexError, ValueError):
-                    await client.send_message(message.chat.id, "**Invalid private chat link format.**", reply_to_message_id=message.id)
-                    continue
+                chatid = int("-100" + datas[4])
                 try:
                     await handle_private(client, acc, message, chatid, msgid)
                 except Exception as e:
@@ -168,11 +158,7 @@ async def save(client: Client, message: Message):
     
             # bot
             elif "https://t.me/b/" in message.text:
-                try:
-                    username = datas[4]
-                except IndexError:
-                    await client.send_message(message.chat.id, "**Invalid bot link format.**", reply_to_message_id=message.id)
-                    continue
+                username = datas[4]
                 try:
                     await handle_private(client, acc, message, username, msgid)
                 except Exception as e:
@@ -181,11 +167,7 @@ async def save(client: Client, message: Message):
             
             # public
             else:
-                try:
-                    username = datas[3]
-                except IndexError:
-                    await client.send_message(message.chat.id, "**Invalid public chat link format.**", reply_to_message_id=message.id)
-                    continue
+                username = datas[3]
 
                 try:
                     msg = await client.get_messages(username, msgid)
@@ -213,12 +195,7 @@ async def save(client: Client, message: Message):
 
 # handle private
 async def handle_private(client: Client, acc, message: Message, chatid: int, msgid: int):
-    try:
-        msg: Message = await acc.get_messages(chatid, msgid)
-    except Exception as e:
-        if ERROR_MESSAGE == True:
-            await client.send_message(message.chat.id, f"Error fetching message: {e}", reply_to_message_id=message.id, parse_mode=enums.ParseMode.HTML)
-        return
+    msg: Message = await acc.get_messages(chatid, msgid)
     if msg.empty: return 
     msg_type = get_message_type(msg)
     if not msg_type: return 

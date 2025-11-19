@@ -36,8 +36,6 @@ async def broadcast(bot, message):
     b_msg = message.reply_to_message
     if not b_msg:
         return await message.reply_text("**Reply This Command To Your Broadcast Message**")
-    if not db:
-        return await message.reply_text("**Database not initialized. Cannot broadcast.**")
     sts = await message.reply_text(
         text='Broadcasting your messages...'
     )

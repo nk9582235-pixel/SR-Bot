@@ -56,8 +56,4 @@ class Database:
         user = await self.col.find_one({'id': int(id)})
         return user.get('api_hash')
 
-try:
-    db = Database(DB_URI, "TechVJDemoBot")
-except Exception as e:
-    print(f"Database connection error: {e}")
-    db = None
+db = Database(DB_URI, "TechVJDemoBot")
