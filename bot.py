@@ -29,18 +29,33 @@ class Bot(Client):
         try:
             await super().start()
             print('Bot Started Powered By @VJ_Bots')
+            # Send a message to the admin when bot starts
+            try:
+                await self.send_message(ADMINS[0], "**Bot Started Successfully!**")
+            except:
+                pass
         except Exception as e:
             print(f'Error starting bot: {e}')
             raise e
 
     async def stop(self, *args):
-
         await super().stop()
         print('Bot Stopped Bye')
 
+# Add a simple health check function
+def health_check():
+    return "Bot is running"
+
 if __name__ == "__main__":
+    import asyncio
     bot = Bot()
-    bot.run()
+    # Run the bot in a way that's compatible with Render
+    try:
+        bot.run()
+    except KeyboardInterrupt:
+        print("Bot stopped by user")
+    except Exception as e:
+        print(f"Bot stopped due to error: {e}")
 
 # Don't Remove Credit Tg - @VJ_Bots
 # Subscribe YouTube Channel For Amazing Bot https://youtube.com/@Tech_VJ

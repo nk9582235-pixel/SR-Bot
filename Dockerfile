@@ -6,4 +6,4 @@ RUN pip3 install -r requirements.txt
 
 COPY . .
 
-CMD gunicorn app:app & python3 bot.py || python bot.py
+CMD gunicorn -b 0.0.0.0:10000 app:app & python3 bot.py
