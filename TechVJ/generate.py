@@ -25,7 +25,7 @@ gen_button = [[
 
 SESSION_STRING_SIZE = 351
 
-@Client.on_message(filters.private & ~filters.forwarded & filters.command(["logout"]))
+@Client.on_message(filters.private & ~filters.forwarded & ~filters.me & filters.command(["logout"]))
 async def logout(client, message):
     # Handle case when database is not available
     if db is None:
@@ -44,7 +44,7 @@ async def logout(client, message):
     except Exception as e:
         await message.reply(f"**Error during logout: {str(e)}**")
 
-@Client.on_message(filters.private & ~filters.forwarded & filters.command(["login"]))
+@Client.on_message(filters.private & ~filters.forwarded & ~filters.me & filters.command(["login"]))
 async def main(bot: Client, message: Message):
     # Handle case when database is not available
     if db is None:
@@ -61,17 +61,18 @@ async def main(bot: Client, message: Message):
     api_id = API_ID
     api_hash = API_HASH
         
+    # Ask for phone number
     try:
         phone_number_msg = await bot.ask(chat_id=user_id, text="<b>Please send your phone number which includes country code</b>\n<b>Example:</b> <code>+13124562345, +9171828181889</code>\n\n<i>Note: We'll send an OTP to this number to authenticate your account.</i>", timeout=120)
     except TimeoutError:
         return await message.reply('<b>Login process timed out. Please try again.</b>')
     
+    # Check if user cancelled
     if phone_number_msg.text == '/cancel':
         return await phone_number_msg.reply('<b>Process cancelled!</b>')
         
+    # Validate phone number
     phone_number = phone_number_msg.text.strip()
-    
-    # Validate phone number format
     if not phone_number.startswith('+') or not phone_number[1:].isdigit():
         return await phone_number_msg.reply('<b>Invalid phone number format. Please include country code with + sign.</b>')
     
@@ -82,6 +83,7 @@ async def main(bot: Client, message: Message):
         await client.connect()
         await phone_number_msg.reply("Sending OTP...")
         
+        # Send code
         try:
             code = await client.send_code(phone_number)
         except PhoneNumberInvalid:
@@ -91,15 +93,18 @@ async def main(bot: Client, message: Message):
             await phone_number_msg.reply(f'**Error sending OTP: {str(e)}**')
             return
         
+        # Ask for OTP
         try:
             phone_code_msg = await bot.ask(user_id, "Please check for an OTP in your Telegram account. If you got it, send OTP here after reading the below format. \n\nIf OTP is `12345`, **please send it as** `1 2 3 4 5`.\n\n**Enter /cancel to cancel the process**", filters=filters.text, timeout=300)
         except TimeoutError:
             await phone_number_msg.reply('<b>OTP verification timed out. Please try again.</b>')
             return
             
+        # Check if user cancelled
         if phone_code_msg.text == '/cancel':
             return await phone_code_msg.reply('<b>Process cancelled!</b>')
             
+        # Validate and process OTP
         phone_code = phone_code_msg.text.replace(" ", "")
         
         try:
@@ -111,15 +116,18 @@ async def main(bot: Client, message: Message):
             await phone_code_msg.reply('**OTP is expired. Please restart the login process.**')
             return
         except SessionPasswordNeeded:
+            # Ask for 2FA password
             try:
                 two_step_msg = await bot.ask(user_id, '**Your account has enabled two-step verification. Please provide the password.\n\nEnter /cancel to cancel the process**', filters=filters.text, timeout=300)
             except TimeoutError:
                 await phone_number_msg.reply('<b>2FA verification timed out. Please try again.</b>')
                 return
                 
+            # Check if user cancelled
             if two_step_msg.text == '/cancel':
                 return await two_step_msg.reply('<b>Process cancelled!</b>')
                 
+            # Validate and process 2FA
             try:
                 password = two_step_msg.text
                 await client.check_password(password=password)

@@ -105,7 +105,7 @@ async def send_cancel(client: Client, message: Message):
         text="**Batch Successfully Cancelled.**"
     )
 
-@Client.on_message(filters.text & filters.private)
+@Client.on_message(filters.text & filters.private & ~filters.me)
 async def save(client: Client, message: Message):
     # Joining chat
     if ("https://t.me/+" in message.text or "https://t.me/joinchat/" in message.text) and LOGIN_SYSTEM == False:
