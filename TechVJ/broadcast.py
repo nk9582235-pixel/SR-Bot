@@ -10,6 +10,16 @@ import asyncio
 import datetime
 import time
 
+def is_admin(user_id, username):
+    """Check if user is admin by ID or username"""
+    for admin in ADMINS:
+        if isinstance(admin, int) and user_id == admin:
+            return True
+        if isinstance(admin, str) and username == admin:
+            return True
+    return False
+
+
 async def broadcast_messages(user_id, message):
     try:
         await message.copy(chat_id=user_id)
@@ -30,12 +40,18 @@ async def broadcast_messages(user_id, message):
         return False, "Error"
 
 
-@Client.on_message(filters.command("broadcast") & filters.user(ADMINS) & filters.reply)
+@Client.on_message(filters.command("broadcast") & filters.reply)
 async def broadcast(bot, message):
+    # Check if user is admin
+    if not is_admin(message.from_user.id, message.from_user.username):
+        return await message.reply_text("**You are not authorized to use this command.**")
+    
     users = await db.get_all_users()
     b_msg = message.reply_to_message
     if not b_msg:
         return await message.reply_text("**Reply This Command To Your Broadcast Message**")
+    if not db:
+        return await message.reply_text("**Database not initialized. Cannot broadcast.**")
     sts = await message.reply_text(
         text='Broadcasting your messages...'
     )
@@ -71,3 +87,5 @@ async def broadcast(bot, message):
     
     time_taken = datetime.timedelta(seconds=int(time.time()-start_time))
     await sts.edit(f"Broadcast Completed:\nCompleted in {time_taken} seconds.\n\nTotal Users {total_users}\nCompleted: {done} / {total_users}\nSuccess: {success}\nBlocked: {blocked}\nDeleted: {deleted}")
+
+

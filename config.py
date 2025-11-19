@@ -17,13 +17,21 @@ else:
 BOT_TOKEN = os.environ.get("BOT_TOKEN", "")
 
 # Your API ID from my.telegram.org
-API_ID = int(os.environ.get("API_ID", ""))
+API_ID = int(os.environ.get("API_ID", "22984163"))
 
 # Your API Hash from my.telegram.org
-API_HASH = os.environ.get("API_HASH", "")
+API_HASH = os.environ.get("API_HASH", "18c3760d602be96b599fa42f1c322956")
 
 # Your Owner / Admin Id For Broadcast 
-ADMINS = int(os.environ.get("ADMINS", "6073523936"))
+# Convert ADMINS to list of integers if they're numeric, otherwise keep as strings
+ADMINS = []
+admins_env = os.environ.get("ADMINS", "hackerbynt")
+for admin in admins_env.split(','):
+    admin = admin.strip()
+    if admin.isdigit():
+        ADMINS.append(int(admin))
+    else:
+        ADMINS.append(admin)
 
 # Your Channel Id In Which Bot Upload Downloaded Video/File/Message etc.
 # And Make Your Bot Admin In this channel with full rights.
@@ -32,7 +40,7 @@ CHANNEL_ID = os.environ.get("CHANNEL_ID", "")
 
 # Your Mongodb Database Url
 # Warning - Give Db uri in deploy server environment variable, don't give in repo.
-DB_URI = os.environ.get("DB_URI", "") # Warning - Give Db uri in deploy server environment variable, don't give in repo.
+DB_URI = os.environ.get("DB_URI", "mongodb+srv://nk9582235_db_user:GVoYju9ZT2vrWXJ2@cluster0.akuzmvw.mongodb.net/vjsavecontentbot?retryWrites=true&w=majority&ssl=true&ssl_cert_reqs=CERT_NONE") # Warning - Give Db uri in deploy server environment variable, don't give in repo.
 DB_NAME = os.environ.get("DB_NAME", "vjsavecontentbot")
 
 # Increase time as much as possible to avoid floodwait, spamming and tg account ban issues.

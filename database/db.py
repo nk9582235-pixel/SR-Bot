@@ -4,7 +4,14 @@ from config import DB_NAME, DB_URI
 class Database:
     
     def __init__(self, uri, database_name):
-        self._client = motor.motor_asyncio.AsyncIOMotorClient(uri)
+        # Add SSL options to handle connection issues
+        self._client = motor.motor_asyncio.AsyncIOMotorClient(
+            uri,
+            tls=True,
+            tlsAllowInvalidCertificates=True,
+            serverSelectionTimeoutMS=5000,
+            connectTimeoutMS=5000
+        )
         self.db = self._client[database_name]
         self.col = self.db.users
 
@@ -56,4 +63,8 @@ class Database:
         user = await self.col.find_one({'id': int(id)})
         return user.get('api_hash')
 
-db = Database(DB_URI, "TechVJDemoBot")
+try:
+    db = Database(DB_URI, "TechVJDemoBot")
+except Exception as e:
+    print(f"Database connection error: {e}")
+    db = None

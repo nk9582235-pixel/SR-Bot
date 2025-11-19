@@ -11,7 +11,10 @@ from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, Message
 from config import API_ID, API_HASH, ERROR_MESSAGE, LOGIN_SYSTEM, STRING_SESSION, CHANNEL_ID, WAITING_TIME
 from database.db import db
 from TechVJ.strings import HELP_TXT
-from bot import TechVJUser
+try:
+    from bot import TechVJUser
+except ImportError:
+    TechVJUser = None
 
 class batch_temp(object):
     IS_BATCH = {}
@@ -59,8 +62,16 @@ def progress(current, total, message, type):
 # start command
 @Client.on_message(filters.command(["start"]))
 async def send_start(client: Client, message: Message):
-    if not await db.is_user_exist(message.from_user.id):
-        await db.add_user(message.from_user.id, message.from_user.first_name)
+    # Handle database connection issues gracefully
+    try:
+        if db is not None:
+            if not await db.is_user_exist(message.from_user.id):
+                await db.add_user(message.from_user.id, message.from_user.first_name)
+    except Exception as e:
+        print(f"Database error in start command: {e}")
+        # Continue execution even if database fails
+        pass
+    
     buttons = [[
         InlineKeyboardButton("❣️ Developer", url = "https://t.me/kingvj01")
     ],[
@@ -119,7 +130,10 @@ async def save(client: Client, message: Message):
             return await message.reply_text("**One Task Is Already Processing. Wait For Complete It. If You Want To Cancel This Task Then Use - /cancel**")
         datas = message.text.split("/")
         temp = datas[-1].replace("?single","").split("-")
-        fromID = int(temp[0].strip())
+        try:
+            fromID = int(temp[0].strip())
+        except:
+            return await message.reply_text("**Invalid URL format. Please check the link and try again.**")
         try:
             toID = int(temp[1].strip())
         except:
@@ -149,7 +163,11 @@ async def save(client: Client, message: Message):
             
             # private
             if "https://t.me/c/" in message.text:
-                chatid = int("-100" + datas[4])
+                try:
+                    chatid = int("-100" + datas[4])
+                except (IndexError, ValueError):
+                    await client.send_message(message.chat.id, "**Invalid private chat link format.**", reply_to_message_id=message.id)
+                    continue
                 try:
                     await handle_private(client, acc, message, chatid, msgid)
                 except Exception as e:
@@ -158,7 +176,11 @@ async def save(client: Client, message: Message):
     
             # bot
             elif "https://t.me/b/" in message.text:
-                username = datas[4]
+                try:
+                    username = datas[4]
+                except IndexError:
+                    await client.send_message(message.chat.id, "**Invalid bot link format.**", reply_to_message_id=message.id)
+                    continue
                 try:
                     await handle_private(client, acc, message, username, msgid)
                 except Exception as e:
@@ -167,7 +189,11 @@ async def save(client: Client, message: Message):
             
             # public
             else:
-                username = datas[3]
+                try:
+                    username = datas[3]
+                except IndexError:
+                    await client.send_message(message.chat.id, "**Invalid public chat link format.**", reply_to_message_id=message.id)
+                    continue
 
                 try:
                     msg = await client.get_messages(username, msgid)
@@ -195,7 +221,12 @@ async def save(client: Client, message: Message):
 
 # handle private
 async def handle_private(client: Client, acc, message: Message, chatid: int, msgid: int):
-    msg: Message = await acc.get_messages(chatid, msgid)
+    try:
+        msg: Message = await acc.get_messages(chatid, msgid)
+    except Exception as e:
+        if ERROR_MESSAGE == True:
+            await client.send_message(message.chat.id, f"Error fetching message: {e}", reply_to_message_id=message.id, parse_mode=enums.ParseMode.HTML)
+        return
     if msg.empty: return 
     msg_type = get_message_type(msg)
     if not msg_type: return 
