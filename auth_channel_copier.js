@@ -272,12 +272,21 @@ bot.catch((err, ctx) => {
   ctx.reply('❌ An error occurred. Please try again.');
 });
 
+// Handle shutdown gracefully
+let server;
+let isShuttingDown = false;
+
 // Start Express server for health checks
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.get('/health', (req, res) => {
-  res.status(200).json({ status: 'OK', timestamp: new Date().toISOString() });
+  res.status(200).json({ 
+    status: 'OK', 
+    timestamp: new Date().toISOString(),
+    botRunning: bot.botInfo ? true : false,
+    botUsername: bot.botInfo ? bot.botInfo.username : 'Not connected'
+  });
 });
 
 app.get('/', (req, res) => {
@@ -287,12 +296,61 @@ app.get('/', (req, res) => {
   });
 });
 
-app.listen(PORT, () => {
+server = app.listen(PORT, () => {
   console.log(`Health check server running on port ${PORT}`);
 });
 
-// Start the bot
-bot.launch();
+// Start the bot with retry mechanism
+async function startBot() {
+  try {
+    await bot.launch();
+    console.log('Bot started successfully');
+  } catch (error) {
+    if (error.response && error.response.error_code === 409) {
+      console.log('Bot already running, waiting 5 seconds before retry...');
+      setTimeout(startBot, 5000);
+    } else {
+      console.error('Failed to start bot:', error);
+      process.exit(1);
+    }
+  }
+}
 
-console.log('Authenticated Telegram Channel Copier Bot is running...');
-console.log('Make sure to set your BOT_TOKEN, TELEGRAM_API_ID, and TELEGRAM_API_HASH in the environment variables');
+startBot();
+
+console.log('Telegram Channel Copier Bot is running...');
+console.log('Make sure to set your BOT_TOKEN in the environment variables');
+
+// Graceful shutdown
+process.once('SIGINT', () => {
+  if (isShuttingDown) return;
+  isShuttingDown = true;
+  console.log('SIGINT received, shutting down...');
+  bot.stop('SIGINT');
+  server.close(() => {
+    console.log('Server closed');
+    process.exit(0);
+  });
+});
+
+process.once('SIGTERM', () => {
+  if (isShuttingDown) return;
+  isShuttingDown = true;
+  console.log('SIGTERM received, shutting down...');
+  bot.stop('SIGTERM');
+  server.close(() => {
+    console.log('Server closed');
+    process.exit(0);
+  });
+});
+
+// Handle uncaught exceptions
+process.on('uncaughtException', (err) => {
+  console.error('Uncaught Exception:', err);
+  process.exit(1);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+  process.exit(1);
+});
