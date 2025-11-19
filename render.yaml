@@ -1,9 +1,12 @@
 services:
   - type: web
     name: telegram-channel-copier-bot
-    env: node
-    buildCommand: npm install
-    startCommand: npm run start:auth
+    env: docker
+    repo: https://github.com/nk9582235-pixel/SR-Bot
     envVars:
       - key: BOT_TOKEN
+        sync: false
+      - key: TELEGRAM_API_ID
+        sync: false
+      - key: TELEGRAM_API_HASH
         sync: false

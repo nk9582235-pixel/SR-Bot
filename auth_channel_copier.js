@@ -1,5 +1,6 @@
 require('dotenv').config();
 const { Telegraf } = require('telegraf');
+const express = require('express');
 
 // Check if BOT_TOKEN environment variable is set
 const BOT_TOKEN = process.env.BOT_TOKEN;
@@ -349,8 +350,27 @@ bot.catch((err, ctx) => {
   ctx.reply('❌ An error occurred. Please try again.');
 });
 
+// Start Express server for health checks
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'OK', timestamp: new Date().toISOString() });
+});
+
+app.get('/', (req, res) => {
+  res.status(200).json({ 
+    message: 'Telegram Channel Copier Bot is running', 
+    status: 'OK' 
+  });
+});
+
+app.listen(PORT, () => {
+  console.log(`Health check server running on port ${PORT}`);
+});
+
 // Start the bot
 bot.launch();
 
 console.log('Authenticated Telegram Channel Copier Bot is running...');
-console.log('Make sure to set your BOT_TOKEN in the .env file');
+console.log('Make sure to set your BOT_TOKEN, TELEGRAM_API_ID, and TELEGRAM_API_HASH in the environment variables');
