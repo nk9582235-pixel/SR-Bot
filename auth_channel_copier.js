@@ -42,7 +42,7 @@ bot.command('start', (ctx) => {
   ctx.reply(`
 Telegram Channel Copier Bot
 
-🔐 *Authentication Required*
+🔐 Authentication Required
 To access private channels, you need to authenticate with your Telegram account.
 
 Step 1: Authenticate
@@ -64,7 +64,7 @@ Step 5: Start copying
 /copy
 
 Check status: /status
-`, { parse_mode: 'Markdown' });
+`);
 });
 
 // Login command
@@ -221,13 +221,13 @@ bot.command('status', (ctx) => {
   const session = getUserSession(ctx.from.id);
   
   ctx.reply(`
-📋 *Current Settings*:
+Current Settings:
 Authentication: ${session.authorized ? '✅ Authorized' : '❌ Not Authorized'}
-Source: \`${session.sourceChannel || 'Not set'}\`
-Target: \`${session.targetChannel || 'Not set'}\`
-Copy Type: \`${session.copyType}\`
-Range: \`${session.messageRange.type === 'full' ? 'Full Channel' : `Messages ${session.messageRange.start} to ${session.messageRange.end}`}\`
-`, { parse_mode: 'Markdown' });
+Source: ${session.sourceChannel || 'Not set'}
+Target: ${session.targetChannel || 'Not set'}
+Copy Type: ${session.copyType}
+Range: ${session.messageRange.type === 'full' ? 'Full Channel' : `Messages ${session.messageRange.start} to ${session.messageRange.end}`}
+`);
 });
 
 // Copy command - main functionality
@@ -277,8 +277,7 @@ bot.command('copy', async (ctx) => {
     const totalCount = endId - startId + 1;
     let copiedCount = 0;
     
-    ctx.reply(`📊 Copying ${totalCount} messages from \`${session.sourceChannel}\` to \`${session.targetChannel}\``, 
-      { parse_mode: 'Markdown' });
+    ctx.reply(`📊 Copying ${totalCount} messages from ${session.sourceChannel} to ${session.targetChannel}`);
     
     // Actual copying process
     for (let messageId = startId; messageId <= endId; messageId++) {
@@ -325,8 +324,7 @@ bot.command('copy', async (ctx) => {
     }
     
     ctx.reply(`✅ Copy process completed!
-Successfully copied ${copiedCount} messages from \`${session.sourceChannel}\` to \`${session.targetChannel}\``, 
-    { parse_mode: 'Markdown' });
+Successfully copied ${copiedCount} messages from ${session.sourceChannel} to ${session.targetChannel}`);
   } catch (error) {
     console.error('Copy error:', error);
     ctx.reply('❌ An error occurred during copying. Please check that the bot has proper permissions and try again.');
