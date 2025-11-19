@@ -27,6 +27,10 @@ SESSION_STRING_SIZE = 351
 
 @Client.on_message(filters.private & ~filters.forwarded & filters.command(["logout"]))
 async def logout(client, message):
+    # Handle case when database is not available
+    if db is None:
+        await message.reply("**Database not available. Logout not possible.**")
+        return
     user_data = await db.get_session(message.from_user.id)  
     if user_data is None:
         return 
@@ -35,6 +39,11 @@ async def logout(client, message):
 
 @Client.on_message(filters.private & ~filters.forwarded & filters.command(["login"]))
 async def main(bot: Client, message: Message):
+    # Handle case when database is not available
+    if db is None:
+        await message.reply("**Database not available. Login not possible.**")
+        return
+    
     user_data = await db.get_session(message.from_user.id)
     if user_data is not None:
         await message.reply("**Your Are Already Logged In. First /logout Your Old Session. Then Do Login.**")
@@ -92,6 +101,9 @@ async def main(bot: Client, message: Message):
     await client.disconnect()
     if len(string_session) < SESSION_STRING_SIZE:
         return await message.reply('<b>invalid session sring</b>')
+    # Handle case when database is not available
+    if db is None:
+        return await message.reply_text("<b>Database not available. Cannot save session.</b>")
     try:
         user_data = await db.get_session(message.from_user.id)
         if user_data is None:

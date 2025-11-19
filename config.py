@@ -40,7 +40,7 @@ CHANNEL_ID = os.environ.get("CHANNEL_ID", "")
 
 # Your Mongodb Database Url
 # Warning - Give Db uri in deploy server environment variable, don't give in repo.
-DB_URI = os.environ.get("DB_URI", "mongodb+srv://nk9582235_db_user:GVoYju9ZT2vrWXJ2@cluster0.akuzmvw.mongodb.net/vjsavecontentbot?retryWrites=true&w=majority&ssl=true&ssl_cert_reqs=CERT_NONE") # Warning - Give Db uri in deploy server environment variable, don't give in repo.
+DB_URI = os.environ.get("DB_URI", "mongodb+srv://nk9582235_db_user:GVoYju9ZT2vrWXJ2@cluster0.akuzmvw.mongodb.net/vjsavecontentbot?retryWrites=false&w=majority&ssl=true&ssl_cert_reqs=CERT_NONE&connectTimeoutMS=5000&socketTimeoutMS=5000&serverSelectionTimeoutMS=5000") # Warning - Give Db uri in deploy server environment variable, don't give in repo.
 DB_NAME = os.environ.get("DB_NAME", "vjsavecontentbot")
 
 # Increase time as much as possible to avoid floodwait, spamming and tg account ban issues.
