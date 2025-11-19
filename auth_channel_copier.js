@@ -27,11 +27,7 @@ function getUserSession(userId) {
         type: 'full', // 'full' or 'partial'
         start: null,
         end: null
-      },
-      authenticated: false,
-      phone: null,
-      code: null,
-      authorized: false
+      }
     });
   }
   return userSessions.get(userId);
@@ -42,82 +38,35 @@ bot.command('start', (ctx) => {
   ctx.reply(`
 Telegram Channel Copier Bot
 
-🔐 Authentication Required
-To access private channels, you need to authenticate with your Telegram account.
+🔐 Authentication Information
+Note: This bot works with channels where it has been added as an administrator.
+For private channels, you must add this bot as an admin to both source and target channels.
 
-Step 1: Authenticate
-/login - Login with your phone number
-
-Step 2: Set Channels
+Step 1: Set Channels
 /schannel -100xxxxxx (or @username for public)
 /tchannel -100xxxxxx (or @username for public)
 
-Step 3: Set Message Range
+Step 2: Set Message Range
 /set_F  "For full channel"
 /set_P  "Selective Message"  Eg: /set_P "https://t.me/xxxxx/71031" "https://t.me/xxxx/71050"
 
-Step 4: Set Copy Type
+Step 3: Set Copy Type
 /all  "For all text and media"
 /media "For media only"
 
-Step 5: Start copying
+Step 4: Start copying
 /copy
 
 Check status: /status
 `);
 });
 
-// Login command
-bot.command('login', (ctx) => {
-  const session = getUserSession(ctx.from.id);
-  session.authenticated = true;
-  ctx.reply('📱 Please send your phone number in international format (e.g., +1234567890)');
-});
-
-// Handle phone number
-bot.hears(/\+?[1-9]\d{1,14}/, async (ctx) => {
-  const session = getUserSession(ctx.from.id);
-  
-  if (!session.authenticated) return;
-  
-  const phone = ctx.message.text.trim();
-  session.phone = phone;
-  
-  // In a real implementation, this would send a code request to Telegram
-  // For demonstration, we'll simulate the process
-  ctx.reply(`🔢 Please enter the 5-digit code sent to your phone (${phone}).
-  
-Note: In a real implementation, this would connect to Telegram's API and send an actual code.`);
-  
-  // Simulate code generation
-  session.code = '12345';
-});
-
-// Handle verification code
-bot.hears(/^\d{5}$/, async (ctx) => {
-  const session = getUserSession(ctx.from.id);
-  
-  if (!session.phone || !session.authenticated) return;
-  
-  const code = ctx.message.text.trim();
-  
-  // In a real implementation, this would verify the code with Telegram
-  if (code === session.code) {
-    session.authorized = true;
-    session.authenticated = false; // Reset auth state
-    ctx.reply('✅ Authentication successful! You can now access private channels.');
-  } else {
-    ctx.reply('❌ Invalid code. Please try again.');
-  }
-});
+// Note: User authentication via phone number is not implemented in this version
+// The bot works by being added as an administrator to channels
 
 // Set source channel
 bot.command('schannel', (ctx) => {
   const session = getUserSession(ctx.from.id);
-  
-  if (!session.authorized) {
-    return ctx.reply('⚠️ Please authenticate first using /login');
-  }
   
   const channelId = ctx.message.text.split(' ')[1];
   
@@ -133,10 +82,6 @@ bot.command('schannel', (ctx) => {
 bot.command('tchannel', (ctx) => {
   const session = getUserSession(ctx.from.id);
   
-  if (!session.authorized) {
-    return ctx.reply('⚠️ Please authenticate first using /login');
-  }
-  
   const channelId = ctx.message.text.split(' ')[1];
   
   if (!channelId) {
@@ -151,10 +96,6 @@ bot.command('tchannel', (ctx) => {
 bot.command('set_F', (ctx) => {
   const session = getUserSession(ctx.from.id);
   
-  if (!session.authorized) {
-    return ctx.reply('⚠️ Please authenticate first using /login');
-  }
-  
   session.messageRange.type = 'full';
   session.messageRange.start = null;
   session.messageRange.end = null;
@@ -164,10 +105,6 @@ bot.command('set_F', (ctx) => {
 // Set partial channel copy
 bot.command('set_P', (ctx) => {
   const session = getUserSession(ctx.from.id);
-  
-  if (!session.authorized) {
-    return ctx.reply('⚠️ Please authenticate first using /login');
-  }
   
   const args = ctx.message.text.split(' ');
   
@@ -196,10 +133,6 @@ bot.command('set_P', (ctx) => {
 bot.command('all', (ctx) => {
   const session = getUserSession(ctx.from.id);
   
-  if (!session.authorized) {
-    return ctx.reply('⚠️ Please authenticate first using /login');
-  }
-  
   session.copyType = 'all';
   ctx.reply('✅ Set copy type to: All (text and media)');
 });
@@ -207,10 +140,6 @@ bot.command('all', (ctx) => {
 // Set copy type to media only
 bot.command('media', (ctx) => {
   const session = getUserSession(ctx.from.id);
-  
-  if (!session.authorized) {
-    return ctx.reply('⚠️ Please authenticate first using /login');
-  }
   
   session.copyType = 'media';
   ctx.reply('✅ Set copy type to: Media only');
@@ -222,7 +151,6 @@ bot.command('status', (ctx) => {
   
   ctx.reply(`
 Current Settings:
-Authentication: ${session.authorized ? '✅ Authorized' : '❌ Not Authorized'}
 Source: ${session.sourceChannel || 'Not set'}
 Target: ${session.targetChannel || 'Not set'}
 Copy Type: ${session.copyType}
@@ -233,10 +161,6 @@ Range: ${session.messageRange.type === 'full' ? 'Full Channel' : `Messages ${ses
 // Copy command - main functionality
 bot.command('copy', async (ctx) => {
   const session = getUserSession(ctx.from.id);
-  
-  if (!session.authorized) {
-    return ctx.reply('⚠️ Please authenticate first using /login');
-  }
   
   // Validate settings
   if (!session.sourceChannel) {
